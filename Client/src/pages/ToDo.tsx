@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import axios from 'axios';
 import { useState } from 'react';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { getCookie } from '../cookie';
 
 interface TodoType {
@@ -10,6 +10,7 @@ interface TodoType {
 }
 
 export default function ToDo() {
+  const queryClient = useQueryClient();
   const [comment, setComment] = useState('');
   const accessApi = axios.create({
     baseURL: `http://localhost:4000`,
@@ -22,23 +23,42 @@ export default function ToDo() {
   }
 
   const { data } = useQuery(['todo'], findTodo);
-  console.log(data[0]?.todos);
-  const list = data[0]?.todos;
+  console.log(data);
+  //const list = data[0]?.todos;
 
   const addTodo = async (newTodo: string): Promise<any> => {
     const response = await accessApi.post<string>(`/addComment`, {
       //id: Math.floor(Math.random() * 100),
       todos: newTodo,
     });
+
     return response;
   };
 
-  const { mutate } = useMutation(addTodo);
+  const { mutate } = useMutation(addTodo, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['todo']);
+    },
+  });
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
     mutate(comment);
   };
+  const deleteTodo = async (e: any): Promise<any> => {
+    const res = await accessApi.delete(`/deleteComment/${e}`);
+    return res;
+  };
+  const { mutate: del } = useMutation(deleteTodo, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['todo']);
+    },
+  });
+
+  const handleDelete = (e: any) => {
+    del(e);
+  };
+
   return (
     <Container>
       <Box>
@@ -51,7 +71,14 @@ export default function ToDo() {
           ></Input>
           <button onClick={handleSubmit}></button>
         </InputBox>
-        <Comment>{list && list.map((a: any) => <a>{a}</a>)}</Comment>
+        <Comment>
+          {data &&
+            data.map((todo: any) => (
+              <ToDoBox key={todo._id} onClick={() => handleDelete(todo._id)}>
+                {todo.todos}
+              </ToDoBox>
+            ))}
+        </Comment>
 
         <Comment></Comment>
       </Box>
@@ -97,4 +124,10 @@ const Input = styled.input`
   width: 100%;
   height: 50px;
   font-size: large;
+`;
+
+const ToDoBox = styled.button`
+  width: 100%;
+  height: 200px;
+  font-size: 50px;
 `;
