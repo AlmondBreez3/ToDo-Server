@@ -3,10 +3,15 @@ const cors = require('cors');
 const app = express();
 const bcrypt = require('bcryptjs');
 const User = require('./models/User.js');
-const { default: mongoose } = require('mongoose');
+const { mongoose } = require('mongoose');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const ToDo = require('./models/TodoModel');
+
+app.use(bodyParser.urlencoded({ extended: 'true' }));
+app.use(bodyParser.json());
 
 // app.get('/userInfo', verifyToken, async (req, res) => {
 //   const { token } = req.cookies;
@@ -22,11 +27,11 @@ const cookieParser = require('cookie-parser');
 // });
 
 mongoose.connect(process.env.MONGO_URL);
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function () {
-  console.log('DB connected!!');
-});
+// const db = mongoose.connection;
+// db.on('error', console.error.bind(console, 'connection error:'));
+// db.once('open', function () {
+//   console.log('DB connected!!');
+// });
 
 const bcryptSalt = bcrypt.genSaltSync(10);
 console.log(bcryptSalt);
@@ -88,8 +93,10 @@ app.post('/register', async (req, res) => {
       email,
       password: bcrypt.hashSync(pw, bcryptSalt),
     });
+    console.log(userDoc);
     res.json(userDoc);
   } catch (e) {
+    console.log(e);
     res.status(422).json(e);
   }
 });
@@ -101,6 +108,7 @@ async function verifyToken(req, res, next) {
 
   try {
     req.decoded = jwt.verify(token, jwtSecret);
+    console.log(req.decoded);
     return next();
   } catch (error) {
     console.log('error');
@@ -111,7 +119,6 @@ async function verifyToken(req, res, next) {
   // res.user = {
   //   name: user.name,
   // };
-  // console.log(res.user);
 
   next();
 }
@@ -126,4 +133,28 @@ app.get('/userInfo', verifyToken, async (req, res) => {
   res.json(user);
 });
 
+app.post('/addComment', (req, res) => {
+  const token = req.headers.authorization.split('Bearer ')[1];
+  console.log('token:', token);
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    if (err) throw err;
+    const todo = await ToDo.create({
+      owner: userData.id,
+      todos: req.body.todos,
+    });
+    await todo.save();
+    res.json(todo);
+  });
+
+  // const contentDoc = await Content.create(list);
+  // res.json(contentDoc);
+});
+
+app.get('/comment', async (req, res) => {
+  const token = req.headers.authorization.split('Bearer ')[1];
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    const { id } = userData;
+    res.json(await ToDo.find({ owner: id }));
+  });
+});
 app.listen(4000);
