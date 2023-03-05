@@ -44,6 +44,7 @@ export default function ToDo() {
   const handleSubmit = (e: any) => {
     e.preventDefault();
     mutate(comment);
+    setComment('');
   };
   const deleteTodo = async (e: any): Promise<any> => {
     const res = await accessApi.delete(`/deleteComment/${e}`);
@@ -66,6 +67,7 @@ export default function ToDo() {
         <InputBox>
           <Input
             type="text"
+            placeholder="검색하세요"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           ></Input>

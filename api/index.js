@@ -159,16 +159,19 @@ app.get('/comment', async (req, res) => {
 });
 
 //delete
-app.delete('/deleteComment/:num', async (req, res) => {
-  const token = req.headers.authorization.split('Bearer ')[1];
-  console.log(req.params.num);
-  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
-    const ind = await ToDo.findByIdAndRemove({ _id: req.params.num });
-    console.log(ind);
-    //ToDo.split(ind, 1);
-    //ToDo.deleteOne({ _id: req.params.num });
-    res.json('delete suceess');
-  });
+app.delete('/deleteComment/:num', verifyToken, async (req, res) => {
+  // const token = req.headers.authorization.split('Bearer ')[1];
+  // console.log(req.params.num);
+  // jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+
+  // });
+  const ind = await ToDo.findByIdAndRemove({ _id: req.params.num });
+  console.log(ind);
+  //ToDo.split(ind, 1);
+  //ToDo.deleteOne({ _id: req.params.num });
+  res.json('delete suceess');
 });
+
+//값수정하기는 맨~나중에 코드 정리까지 끝나면 하자
 
 app.listen(4000);
