@@ -18,7 +18,7 @@ export default function ToDo() {
   });
 
   async function findTodo() {
-    const response = await accessApi.get('/comment');
+    const response = await accessApi.get('/todo/comment');
     return response.data;
   }
 
@@ -27,7 +27,7 @@ export default function ToDo() {
   //const list = data[0]?.todos;
 
   const addTodo = async (newTodo: string): Promise<any> => {
-    const response = await accessApi.post<string>(`/addComment`, {
+    const response = await accessApi.post<string>(`/todo/addComment`, {
       //id: Math.floor(Math.random() * 100),
       todos: newTodo,
     });

@@ -8,7 +8,8 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const ToDo = require('./models/TodoModel');
+const ToDo = require('./models/TodoModel.js');
+const todoRouter = require('./routes/TodoRoute');
 
 app.use(bodyParser.urlencoded({ extended: 'true' }));
 app.use(bodyParser.json());
@@ -100,6 +101,7 @@ app.post('/register', async (req, res) => {
     res.status(422).json(e);
   }
 });
+app.use('/todo', todoRouter);
 
 async function verifyToken(req, res, next) {
   const token = req.headers.authorization.split('Bearer ')[1];
@@ -133,30 +135,27 @@ app.get('/userInfo', verifyToken, async (req, res) => {
   res.json(user);
 });
 
-app.post('/addComment', (req, res) => {
-  const token = req.headers.authorization.split('Bearer ')[1];
-  console.log('token:', token);
-  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
-    if (err) throw err;
-    const todo = await ToDo.create({
-      owner: userData.id,
-      todos: req.body.todos,
-    });
-    await todo.save();
-    res.json(todo);
-  });
+// app.post('/addComment', (req, res) => {
+//   const token = req.headers.authorization.split('Bearer ')[1];
+//   console.log('token:', token);
+//   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+//     if (err) throw err;
+//     const todo = await ToDo.create({
+//       owner: userData.id,
+//       todos: req.body.todos,
+//     });
+//     await todo.save();
+//     res.json(todo);
+//   });
+// });
 
-  // const contentDoc = await Content.create(list);
-  // res.json(contentDoc);
-});
-
-app.get('/comment', async (req, res) => {
-  const token = req.headers.authorization.split('Bearer ')[1];
-  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
-    const { id } = userData;
-    res.json(await ToDo.find({ owner: id }));
-  });
-});
+// app.get('/comment', async (req, res) => {
+//   const token = req.headers.authorization.split('Bearer ')[1];
+//   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+//     const { id } = userData;
+//     res.json(await ToDo.find({ owner: id }));
+//   });
+// });
 
 //delete
 app.delete('/deleteComment/:num', verifyToken, async (req, res) => {
