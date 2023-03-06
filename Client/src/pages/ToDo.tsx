@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import axios from 'axios';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { Link } from 'react-router-dom';
 import { getCookie } from '../cookie';
 
 interface TodoType {
@@ -84,6 +85,7 @@ export default function ToDo() {
 
         <Comment></Comment>
       </Box>
+      <Link to="/mypage">mypage</Link>
     </Container>
   );
 }

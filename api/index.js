@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const ToDo = require('./models/TodoModel.js');
 const todoRouter = require('./routes/TodoRoute');
+const mypageRouter = require('./routes/MyPageRoute');
 
 app.use(bodyParser.urlencoded({ extended: 'true' }));
 app.use(bodyParser.json());
@@ -102,7 +103,7 @@ app.post('/register', async (req, res) => {
   }
 });
 app.use('/todo', todoRouter);
-
+app.use('/myPage', mypageRouter);
 async function verifyToken(req, res, next) {
   const token = req.headers.authorization.split('Bearer ')[1];
 
